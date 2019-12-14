@@ -16,7 +16,7 @@ import (
 
 type HashFn func(data []byte) uint32
 
-type hashCircle struct {
+type HashCircle struct {
     replicas int
     hashFn   HashFn
     keys     []int // asc
@@ -24,11 +24,11 @@ type hashCircle struct {
 }
 
 // 创建一个一致性hash环
-func New(replicas int, hashFn HashFn, keys ...string) *hashCircle {
+func New(replicas int, hashFn HashFn, keys ...string) *HashCircle {
     if hashFn == nil {
         hashFn = crc32.ChecksumIEEE
     }
-    m := &hashCircle{
+    m := &HashCircle{
         replicas: replicas,
         hashFn:   hashFn,
         hashMap:  make(map[int]string),
@@ -37,7 +37,7 @@ func New(replicas int, hashFn HashFn, keys ...string) *hashCircle {
     return m
 }
 
-func (m *hashCircle) add(keys []string) {
+func (m *HashCircle) add(keys []string) {
     for _, key := range keys {
         for i := 0; i <= m.replicas; i++ {
             hash := int(m.hashFn([]byte(fmt.Sprintf("%s %d", key, i))))
@@ -49,12 +49,12 @@ func (m *hashCircle) add(keys []string) {
 }
 
 // 判断是否没有任何key
-func (m *hashCircle) Empty() bool {
+func (m *HashCircle) Empty() bool {
     return len(m.keys) == 0
 }
 
 // Get获取散列中最接近提供的键的项.
-func (m *hashCircle) Get(key string) string {
+func (m *HashCircle) Get(key string) string {
     if len(m.keys) == 0 {
         return ""
     }
