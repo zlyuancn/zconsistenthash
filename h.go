@@ -17,7 +17,7 @@ import (
 type HashFn func(data []byte) uint32
 
 type HashCircle struct {
-    replicas int
+    replicas int // 副本数, 服务总数=1+副本数
     hashFn   HashFn
     keys     []int // asc
     hashMap  map[int]string
@@ -38,8 +38,9 @@ func New(replicas int, hashFn HashFn, keys ...string) *HashCircle {
 }
 
 func (m *HashCircle) add(keys []string) {
+    srv_num := 1 + m.replicas
     for _, key := range keys {
-        for i := 0; i <= m.replicas; i++ {
+        for i := 0; i < srv_num; i++ {
             hash := int(m.hashFn([]byte(fmt.Sprintf("%s %d", key, i))))
             m.keys = append(m.keys, hash)
             m.hashMap[hash] = key
